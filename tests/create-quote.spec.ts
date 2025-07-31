@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("Login demo test 1", async ({ page }) => {
+test("Create Quote:", async ({ page }) => {
   // Navigate to login page
   await page.goto("https://dev.portal.denowatts.com/signin");
   await page.waitForLoadState("networkidle");
@@ -106,6 +106,7 @@ test("Login demo test 1", async ({ page }) => {
   await page.getByText("GB/mo").click();
   await page.getByText("5 GB/mo").click();
 
+  await page.waitForLoadState("networkidle");
   await page.getByRole("button", { name: "Submit Quote" }).click();
   await page.waitForLoadState("networkidle");
 
