@@ -2,16 +2,18 @@ import { expect, test } from "@playwright/test";
 
 test("Create Quote:", async ({ page }) => {
   // Navigate to login page
-  await page.goto("https://dev.portal.denowatts.com/signin");
+  await page.goto(
+    process.env.LOGIN_URL || "https://dev.portal.denowatts.com/signin"
+  );
   await page.waitForLoadState("networkidle");
 
   // Login
   await page
     .getByRole("textbox", { name: "* Email" })
-    .fill("apps@niftyitsolution.com");
+    .fill(process.env.USER_EMAIL || "");
   await page
     .getByRole("textbox", { name: "* Password" })
-    .fill('f@]+yN!ogbCFE"pi33');
+    .fill(process.env.USER_PASSWORD || "");
   await page.getByRole("button", { name: "Login" }).click();
 
   // Wait for login to complete
