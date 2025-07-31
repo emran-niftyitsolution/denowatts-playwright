@@ -70,8 +70,10 @@ test("Update Quote:", async ({ page }) => {
   await page
     .getByRole("textbox", { name: "* Denowatts equipment needed" })
     .click();
-  await page.getByRole("button", { name: "next-year", exact: true }).click();
-  await page.locator('td[title="2025-10-10"]').click();
+  // Skip date selection since it's already set to 2025-10-10
+  // If you need to change the date, uncomment the following:
+  // await page.getByRole("button", { name: "prev-year", exact: true }).click(); // Go back to October
+  // await page.locator('td[title="2025-10-10"]').click();
   await page.getByRole("button", { name: "Update Quote" }).click();
   await page.pause();
 });
