@@ -61,8 +61,18 @@ test("Update Quote:", async ({ page }) => {
     .click();
   await page.getByText("2026").click();
   await page.getByRole("radio", { name: "Retrofit" }).check();
-  await page.getByRole("checkbox", { name: "Ground (Fixed)" }).uncheck();
-  await page.getByRole("checkbox", { name: "Ground (Tracker)" }).uncheck();
+
+  // Handle checkboxes - use click() for Ant Design checkboxes
+  const groundFixedCheckbox = page.getByRole("checkbox", {
+    name: "Ground (Fixed)",
+  });
+  const groundTrackerCheckbox = page.getByRole("checkbox", {
+    name: "Ground (Tracker)",
+  });
+
+  // Click to toggle checkboxes - this works better with Ant Design
+  await groundFixedCheckbox.click();
+  await groundTrackerCheckbox.click();
   await page.getByText("Bifacial").click();
   await page.getByRole("button", { name: "Next", exact: true }).click();
   await page.getByRole("checkbox", { name: "Opc Client Setup" }).uncheck();
