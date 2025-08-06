@@ -1,77 +1,162 @@
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
-test("test", async ({ page }) => {
-  await page.goto("https://dev.portal.denowatts.com/signin");
+// Test data
+const TEST_DATA = {
+  login: {
+    email: "apps@niftyitsolution.com",
+    password: 'f@]+yN!ogbCFE"pi33',
+    url: "https://dev.portal.denowatts.com/signin",
+  },
+  project: {
+    name: "Test Project",
+    owner: "Test Company",
+    address: "Test Address",
+    town: "Test Town",
+    state: "Alabama",
+    zipCode: "13213",
+    acNameplate: "12321",
+    commercialYear: "2025",
+  },
+  installationTypes: [
+    "Carport",
+    "Ground (Fixed)",
+    "Ground (Tracker)",
+    "Rooftop",
+  ],
+  panelTypes: ["Monofacial", "Bifacial"],
+  epcServices: [
+    "EPC Startup and Capacity",
+    "Cellular Modem and Service",
+    "Remote Access VPN",
+    "Opc Client Setup",
+    "Outdoor Enclosure",
+    "Show Horizontal",
+  ],
+};
+
+test.describe("Quote Creation", () => {
+  test("should create a new quote successfully", async ({ page }) => {
+    // Step 1: Login
+    await login(page);
+
+    // Step 2: Navigate to quote creation
+    await navigateToQuoteCreation(page);
+
+    // Step 3: Fill project details
+    await fillProjectDetails(page);
+
+    // Step 4: Select installation and panel types
+    await selectInstallationTypes(page);
+    await selectPanelTypes(page);
+
+    // Step 5: Proceed to next step
+    await proceedToNextStep(page);
+
+    // Step 6: Configure quote settings
+    await configureQuoteSettings(page);
+
+    // Step 7: Submit quote
+    await submitQuote(page);
+
+    // Step 8: Verify navigation to quote management
+    await expect(page).toHaveURL(/.*quote-management/);
+  });
+});
+
+// Helper functions
+async function login(page: any) {
+  await page.goto(TEST_DATA.login.url);
   await page
     .getByRole("textbox", { name: "* Email" })
-    .fill("apps@niftyitsolution.com");
+    .fill(TEST_DATA.login.email);
   await page
     .getByRole("textbox", { name: "* Password" })
-    .fill('f@]+yN!ogbCFE"pi33');
+    .fill(TEST_DATA.login.password);
   await page.getByRole("button", { name: "Login" }).click();
   await page.waitForLoadState("networkidle");
+}
 
+async function navigateToQuoteCreation(page: any) {
   await page.getByRole("img", { name: "Settings" }).click();
   await page.getByRole("menuitem", { name: "Quotation Management" }).click();
   await page.getByRole("button", { name: "plus Create Quote" }).click();
-
   await page.waitForLoadState("networkidle");
-  await page.getByRole("textbox", { name: "* Project Name" }).fill("Test");
+}
+
+async function fillProjectDetails(page: any) {
+  const { project } = TEST_DATA;
+
+  await page
+    .getByRole("textbox", { name: "* Project Name" })
+    .fill(project.name);
   await page
     .getByRole("textbox", { name: "* Project Owner (Name of" })
-    .fill("TEST");
-  await page.getByRole("textbox", { name: "* Project Address" }).fill("test");
-  await page.getByRole("textbox", { name: "* Town" }).fill("test");
+    .fill(project.owner);
+  await page
+    .getByRole("textbox", { name: "* Project Address" })
+    .fill(project.address);
+  await page.getByRole("textbox", { name: "* Town" }).fill(project.town);
+
+  // Select state
   await page.getByRole("combobox", { name: "* State" }).click();
-  await page.getByTitle("Alabama").click();
-  await page.getByRole("textbox", { name: "* Zip Code" }).fill("13213");
+  await page.getByTitle(project.state).click();
+
+  await page.getByRole("textbox", { name: "* Zip Code" }).fill(project.zipCode);
   await page
     .getByRole("spinbutton", { name: "* AC Nameplate (Please use MW)" })
-    .fill("12321");
+    .fill(project.acNameplate);
+
+  // Select commercial operation year
   await page.locator(".ant-picker-input").click();
-  await page.getByRole("cell", { name: "2025" }).click();
-  // Use more reliable selectors for Ant Design checkboxes
-  await page.getByText("Carport").click();
-  await page.getByText("Ground (Fixed)").click();
-  await page.getByText("Ground (Tracker)").click();
-  await page.getByText("Rooftop").click();
-  await page.getByText("Monofacial").click();
-  await page.getByText("Bifacial").click();
+  await page.getByRole("cell", { name: project.commercialYear }).click();
+}
+
+async function selectInstallationTypes(page: any) {
+  for (const installationType of TEST_DATA.installationTypes) {
+    await page.getByText(installationType).click();
+  }
+}
+
+async function selectPanelTypes(page: any) {
+  for (const panelType of TEST_DATA.panelTypes) {
+    await page.getByText(panelType).click();
+  }
+}
+
+async function proceedToNextStep(page: any) {
   await page.getByRole("button", { name: "Next", exact: true }).click();
   await page.waitForLoadState("networkidle");
+}
 
+async function configureQuoteSettings(page: any) {
+  // Select date
   await page.locator(".ant-picker-input").click();
   await page.getByRole("cell", { name: "20", exact: true }).click();
+
+  // Select weather and energy options
   await page.getByTitle("Basic Weather").click();
   await page.getByText("Advanced Energy Accounting").click();
   await page.waitForLoadState("networkidle");
 
+  // Select service duration
   await page.getByText("5 Years").click();
   await page.getByText("1 Year").click();
   await page.waitForLoadState("networkidle");
 
-  await page.getByText("EPC Startup and Capacity").click();
-  await page.waitForLoadState("networkidle");
+  // Select EPC services
+  for (const service of TEST_DATA.epcServices) {
+    await page.getByText(service).click();
+    await page.waitForLoadState("networkidle");
+  }
 
-  await page.getByText("Cellular Modem and Service").click();
-  await page.waitForLoadState("networkidle");
-
+  // Configure data plan
   await page.getByText("1 GB/mo", { exact: true }).click();
   await page.getByText("10 GB/mo").click();
   await page.waitForLoadState("networkidle");
+}
 
-  await page.getByText("Remote Access VPN").click();
-  await page.waitForLoadState("networkidle");
-
-  await page.getByText("Opc Client Setup").click();
-  await page.waitForLoadState("networkidle");
-
-  await page.getByText("Outdoor Enclosure").click();
-  await page.waitForLoadState("networkidle");
-
-  await page.getByText("Show Horizontal").click();
-  await page.waitForLoadState("networkidle");
-
+async function submitQuote(page: any) {
   await page.getByRole("button", { name: "Submit Quote" }).click();
+  await page.waitForLoadState("networkidle");
   await page.goto("https://dev.portal.denowatts.com/settings/quote-management");
-});
+}
