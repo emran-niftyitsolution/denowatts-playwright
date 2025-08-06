@@ -3,8 +3,8 @@ import { expect, test } from "@playwright/test";
 // Test data
 const TEST_DATA = {
   login: {
-    email: "apps@niftyitsolution.com",
-    password: 'f@]+yN!ogbCFE"pi33',
+    email: process.env.USER_EMAIL,
+    password: process.env.USER_PASSWORD,
     url: "https://dev.portal.denowatts.com/signin",
   },
   project: {
